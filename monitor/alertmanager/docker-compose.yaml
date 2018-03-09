@@ -1,0 +1,7 @@
+alertmanager:
+  image: alertmanager:latest
+  volumes:
+  - ./config:/etc/alertmanager
+  - ./data/alertmanager:/data
+  ports:
+  - 13003:9093

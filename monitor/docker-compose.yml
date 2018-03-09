@@ -1,0 +1,47 @@
+version: '2'
+services:
+  grafana:
+    image: grafana:4.6.2
+    tty: true
+    links:
+    - prometheus:prometheus
+    volumes:
+    - ./grafana:/var/lib/grafana
+    ports:
+    - 13000:3000/tcp
+    restart: always
+  prometheus:
+    image: prometheus:v1.8.2
+    volumes:
+    - ./prometheus/data:/prometheus
+    - ./prometheus/prom-conf:/etc/prom-conf
+    tty: true
+    ports:
+    - 13001:9090/tcp
+    links:
+    - consul:consul
+    command:
+    - -alertmanager.url=http://alert_manager_server:13003
+    - -config.file=/etc/prom-conf/prometheus.yml
+    - -storage.local.path=/prometheus
+    - -web.console.libraries=/etc/prometheus/console_libraries
+    - -web.console.templates=/etc/prometheus/consoles
+    restart: always
+  consul:
+    image: consul:latest
+    volumes:
+    - ./consul:/consul
+    ports:
+    - 13002:8500/tcp
+    tty: true
+    environment:
+     CONSUL_LOCAL_CONFIG: '{"skip_leave_on_interrupt": true}'
+    command:
+    - agent
+    - -server
+    - -ui
+    - -bootstrap-expect=1
+    - -bind=0.0.0.0
+    - -node=server1
+    - -client=0.0.0.0
+    restart: always

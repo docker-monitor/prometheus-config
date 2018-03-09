@@ -1,0 +1,34 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+      monitor: 'exporter-metrics'
+
+scrape_configs:
+- job_name: 'Prometheus'
+  static_configs:
+    - targets:
+      - 'prometheus_server:13001'
+
+- job_name: 'overwritten-default'
+  consul_sd_configs:
+    - server:   'consul_server:13002'
+  relabel_configs:
+  - source_labels: ['__meta_consul_service']
+    regex:         '(.*)'
+    target_label:  'job'
+    replacement:   '$1'
+  - source_labels: ['__meta_consul_service_address']
+    regex:         '(.*)'
+    target_label:  'server'
+    replacement:   '$1'
+  - source_labels: ['__meta_consul_tags']
+    regex:         ',(.*),'
+    target_label:  'type'
+    replacement:   '$1'
+  - source_labels: ['__meta_consul_service']
+    regex:         '(.*)'
+    target_label:  'project'
+    replacement:   '$1'
+rule_files:
+  - ./rules/my.rules

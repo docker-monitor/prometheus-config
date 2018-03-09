@@ -1,0 +1,8 @@
+ALERT RedAlert_server_down
+  IF up == 0
+  FOR 5s
+  LABELS { status = "down" }
+  ANNOTATIONS {
+    summary = "This server same unaliveable, please check soon",
+    description = "Can not get metic from current instance {{ $labels.instance }}, please check the server"
+  }
